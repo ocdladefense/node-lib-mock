@@ -1,7 +1,5 @@
-import { ISODate } from "../lib-date/ISODate.js";
 import { HttpMock } from "../lib-http/HttpMock.js";
 import { Url } from "../lib-http/Url.js";
-import { DateRange } from "../lib-date/DateRange.js";
 export { OarApiMock };
 
 let oarInfo = {
@@ -13,7 +11,7 @@ let oarInfo = {
 };
 
 class OarApiMock extends HttpMock {
-    //https://www.googleapis.com/calendar/v3/calendars/biere-library@thebierelibrary.com/events?timeMin=2023-07-01&timeMax=2023=07-15&test
+    //https://secure.sos.state.or.us/oard/view.action?ruleNumber=213-002-0001
     errors = {
         'success': false,
         'error': 'Invalid chapter'
@@ -43,13 +41,23 @@ class OarApiMock extends HttpMock {
         return Response.json(data);
     }
 
-    filterOar(chapter, section, rule) {
+    filterOar(chapter, division, rule) {
 
+        /*
         function fn() {
             //return true;
         }
 
         return oarInfo.filter(fn);
+        */
+
+        let oarRuling = oarInfo[chapter][division][rule];
+
+        if (oarRuling) {
+            return oarRuling;
+        }
+
+        throw new RangeError("Requested ruling does not exist.");
     }
 
 
