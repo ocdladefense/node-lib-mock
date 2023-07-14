@@ -35,42 +35,37 @@ class OarApiMock extends HttpMock {
             data = this.filterOar(query[0], query[1], query[2]);
 
         } catch (e) {
-            data = {
-                success: false,
-                error: true,
-                code: e.cause,
-                message: e.message
-            };
+            data = e.message;
         }
 
 
 
-        return Response.json(data);
+        return new Response(data);
     }
 
     filterOar(chapter, division, rule) {
 
         let oarRuling = oarInfo[chapter][division][rule];
 
-        if (oarRuling) {
-            // splits the ruling wherever there is a () with a number/letter inside.
-            let rulingSplit = oarRuling.split(PATTERN);
-            let rulingFilter = [];
-
-            // we create a new array and manually put together each subsection.
-            rulingFilter.push(rulingSplit[0]);
-            
-            // it's a lot of brute forcing...
-            for (var i = 0; i < rulingSplit.length; i++) {
-                if (rulingSplit[i].charAt(0) == '(') {
-                    rulingFilter.push(rulingSplit[i] + rulingSplit[i + 1]);
-                }
-            }
-
-            return rulingFilter;
+        if (!oarRuling) {
+            throw new RangeError("Requested ruling does not exist.");
         }
 
-        throw new RangeError("Requested ruling does not exist.");
+        // splits the ruling wherever there is a () with a number/letter inside.
+        let rulingSplit = oarRuling.split(PATTERN);
+        let rulingFilter = [];
+
+        // we create a new array and manually put together each subsection.
+        rulingFilter.push(rulingSplit[0]);
+        
+        // it's a lot of brute forcing...
+        for (var i = 0; i < rulingSplit.length; i++) {
+            if (rulingSplit[i].charAt(0) == '(') {
+                rulingFilter.push(rulingSplit[i] + rulingSplit[i + 1]);
+            }
+        }
+
+        return rulingFilter;
     }
 
 
