@@ -1,6 +1,8 @@
-import { HttpMock } from "../lib-http/HttpMock.js";
-import { Url } from "../lib-http/Url.js";
+import { HttpMock } from "../../node_modules/@ocdladefense/lib-http/HttpMock.js";
+import { Url } from "../../node_modules/@ocdladefense/lib-http/Url.js";
 export { OarApiMock };
+
+const PATTERN = /(?<Subsection>\(\w\)?)/gm;
 
 let oarInfo = {
     '213': {
@@ -20,12 +22,17 @@ class OarApiMock extends HttpMock {
     getResponse(req) {
         let url = new Url(req.url);
         let data = [];
-        //pretend we have parsed the url
+        // pretend we have parsed the url
         let query = url.getQuery();
+        // we get a single parameter from the url for now- ruleNumber. we split it at every dash to get the chapter, division and ruling.
+        query = query.ruleNumber.split('-');
 
         try {
-            
-            data = this.filterOar(query.chapter, query.section, query.rule);
+            if (!oarInfo[query[0]]) {
+                throw new RangeError("Chapter does not exist.", { cause: "INVALID_CHAPTER" });
+            }
+
+            data = this.filterOar(query[0], query[1], query[2]);
 
         } catch (e) {
             data = {
@@ -43,18 +50,24 @@ class OarApiMock extends HttpMock {
 
     filterOar(chapter, division, rule) {
 
-        /*
-        function fn() {
-            //return true;
-        }
-
-        return oarInfo.filter(fn);
-        */
-
         let oarRuling = oarInfo[chapter][division][rule];
 
         if (oarRuling) {
-            return oarRuling;
+            // splits the ruling wherever there is a () with a number/letter inside.
+            let rulingSplit = oarRuling.split(PATTERN);
+            let rulingFilter = [];
+
+            // we create a new array and manually put together each subsection.
+            rulingFilter.push(rulingSplit[0]);
+            
+            // it's a lot of brute forcing...
+            for (var i = 0; i < rulingSplit.length; i++) {
+                if (rulingSplit[i].charAt(0) == '(') {
+                    rulingFilter.push(rulingSplit[i] + rulingSplit[i + 1]);
+                }
+            }
+
+            return rulingFilter;
         }
 
         throw new RangeError("Requested ruling does not exist.");
