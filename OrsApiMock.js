@@ -38,17 +38,12 @@ class OrsApiMock extends HttpMock {
             data = this.filterSections(query.chapter, query.section);
 
         } catch (e) {
-            data = {
-                success: false,
-                error: true,
-                code: e.cause,
-                message: e.message
-            };
+            data = e.message;
         }
 
 
 
-        return Response.json(data);
+        return new Response(data);
     }
 
     filterSections(chapter, section = null) {
