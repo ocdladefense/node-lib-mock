@@ -1,5 +1,5 @@
-import { HttpMock } from "/WEBC-ORS/node_modules/@ocdladefense/lib-http/HttpMock.js";
-import { Url } from "/WEBC-ORS/node_modules/@ocdladefense/lib-http/Url.js";
+import { HttpMock } from "../lib-http/HttpMock.js";
+import { Url } from "../lib-http/Url.js";
 export { OrsApiMock };
 
 
